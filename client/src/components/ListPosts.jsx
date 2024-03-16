@@ -7,10 +7,9 @@ const ListPosts = () => {
     const [posts, setPosts] = useState({})
     useEffect(() => {
         async function fetch(){
-            const response = await axios.get("http://localhost:4000/posts")
+            const response = await axios.get("http://localhost:4002/posts")
             setPosts(response.data)
         }
-
         fetch()
         console.log(posts);
     },[])
@@ -20,7 +19,7 @@ const ListPosts = () => {
               Object.values(posts).map((item) => <div className='flex'>
                   <div className='p-3 border'>
                       <h1>{item.title}</h1>
-                      <Listcomments postId={item.id}/>
+                      <Listcomments comments={item.comments}/>
                       <CreateComment postId={item.id}/>
                   </div>
               </div>)
