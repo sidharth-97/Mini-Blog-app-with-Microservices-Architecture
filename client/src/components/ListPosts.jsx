@@ -14,16 +14,19 @@ const ListPosts = () => {
         console.log(posts);
     },[])
   return (
-      <div className='flex gap-3'>
+      <div className='flex gap-3 flex-col w-full text-center p-5'>
+          <h1 className='text-xl underline'>List of Posts</h1>
+          <div className='text-left items-center flex flex-col gap-2'>
           {
-              Object.values(posts).map((item) => <div className='flex'>
-                  <div className='p-3 border'>
-                      <h1>{item.title}</h1>
-                      <Listcomments comments={item.comments}/>
+              Object.values(posts).map((item) => <div className='flex w-1/2'>
+                  <div className='p-3 border rounded-md'>
+                  <h1 className='mt-1'>{item.title}</h1>
                       <CreateComment postId={item.id}/>
+                      <Listcomments comments={item.comments}/>
                   </div>
               </div>)
           }
+        </div>
     </div>
   )
 }

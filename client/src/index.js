@@ -9,8 +9,11 @@ import ListPosts from './components/ListPosts';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
+    <div className='w-screen'>
     <CreatePost />
     <ListPosts/>
+    </div>
+  
   </React.StrictMode>
 );
 reportWebVitals();

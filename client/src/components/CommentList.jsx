@@ -4,7 +4,7 @@ import CreateComment from "./CreateComment";
 
 const Listcomments = ({ comments }) => {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 mt-1">
       <ul>
         {comments?.map((comment) => {
           let content

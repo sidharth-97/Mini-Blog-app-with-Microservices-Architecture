@@ -12,11 +12,11 @@ const CreateComment = ({postId}) => {
         setContent("")
     }
   return (
-      <div>
-          <h1>New Comment</h1>
-          <form > 
-            <input onChange={(e) => setContent(e.target.value)} type="text"/>      
-            <button onClick={handleSubmit}>Submit</button>
+      <div className=' w-1/2 min-w-96'>
+          <h1 className=' font-medium mb-1'>New Comment</h1>
+          <form className='flex flex-col gap-1'> 
+            <input className='border' onChange={(e) => setContent(e.target.value)} type="text"/>      
+            <button className='bg-black text-white p-1 rounded-md' onClick={handleSubmit}>Submit</button>
           </form>
     </div>
   )
