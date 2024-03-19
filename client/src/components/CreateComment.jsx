@@ -6,7 +6,7 @@ const CreateComment = ({postId}) => {
     const handleSubmit = (e) => {
         e.preventDefault()
         async function fetch() {
-           await axios.post(`http://localhost:4001/posts/${postId}/comments`, { content })
+           await axios.post(`http://posts.com/posts/${postId}/comments`, { content })
         }
         fetch()
         setContent("")
