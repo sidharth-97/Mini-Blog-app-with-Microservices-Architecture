@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import axios from "axios"
+import amqp from "amqplib"
 
 const app = express()
 
@@ -10,6 +11,8 @@ app.use(cors())
 
 const posts = {}
 
+let connection, channel;
+
 const handleEvents = (type,data) => {
   if (type == "PostCreated") {
     const { id, title } = data
@@ -18,13 +21,13 @@ const handleEvents = (type,data) => {
 if (type == "CommentCreated") {
     const { id, content, postId,status } = data
     const post = posts[postId]
-    post.comments.push({id,content,status})
+    post?.comments?.push({id,content,status})
 }
-if (type == "CommentUpdated") {
+if (type == "CommentModerated") {
 console.log("update");
 const { id, status, postId, content } = data
 const post = posts[postId]
-const comment = post.comments.find(comment => comment.id == id)
+const comment = post?.comments?.find(comment => comment.id == id)
 comment.status = status
 comment.content=content
 }
@@ -39,6 +42,7 @@ async function connect() {
 
     const q = await channel.assertQueue("query_queue");
     await channel.bindQueue(q.queue, "posts_exchange", "post_created");
+    await channel.bindQueue(q.queue, "posts_exchange", "comment_created");
     await channel.bindQueue(q.queue, "posts_exchange", "comment_moderated");
 
     channel.consume(q.queue, (msg) => {

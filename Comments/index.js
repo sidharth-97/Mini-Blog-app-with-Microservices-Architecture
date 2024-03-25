@@ -2,6 +2,7 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
 const axios =require("axios")
+const amqp=require("amqplib")
 
 const { randomBytes }=require('crypto')
 
