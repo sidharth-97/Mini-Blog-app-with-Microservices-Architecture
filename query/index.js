@@ -30,22 +30,36 @@ comment.content=content
 }
 }
 
+async function connect() {
+  try {
+    const amqpServer = "amqp://rabbitmq-service";
+    connection = await amqp.connect(amqpServer);
+    channel = await connection.createChannel();
+    await channel.assertExchange("posts_exchange", "direct");
+
+    const q = await channel.assertQueue("query_queue");
+    await channel.bindQueue(q.queue, "posts_exchange", "post_created");
+    await channel.bindQueue(q.queue, "posts_exchange", "comment_moderated");
+
+    channel.consume(q.queue, (msg) => {
+      const { type, data } = JSON.parse(msg.content.toString());
+      console.log("Received message:", type, data);
+      handleEvents(type, data);
+      channel.ack(msg);
+    });
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
+
+connect();
+
 app.get("/posts", (req, res) => {
   res.send(posts)
 })
 
-app.post("/events", (req, res) => {
-      const { type, data } = req.body
-   handleEvents(type,data)
-  console.log(posts);
-    res.send({})
-})
-
 app.listen(4002, async() => {
   console.log("Server connected")
-  const res = await axios.get("http://event-bus-srv:4005/events")
-  for (let event of res.data) {
-    handleEvents(event.type,event.data)
-  }
 }
 )

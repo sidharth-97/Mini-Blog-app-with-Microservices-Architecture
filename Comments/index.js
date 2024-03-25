@@ -9,55 +9,58 @@ const app = express()
 app.use(bodyParser.json())
 app.use(cors())
 
-const commentsByPostId={}
+
+let connection, channel;
+const commentsByPostId = {};
+
+async function connect() {
+  try {
+    const amqpServer = "amqp://rabbitmq-service";
+    connection = await amqp.connect(amqpServer);
+    channel = await connection.createChannel();
+    await channel.assertExchange("posts_exchange", "direct"); 
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+}
 
 app.get("/posts/:id/comments", (req, res) => {
-    res.send(commentsByPostId[req.params.id] || null)
-})
+  res.send(commentsByPostId[req.params.id] || []);
+});
 
-app.post("/posts/:id/comments", async(req, res) => {
-    const commentId = randomBytes(4).toString("hex")
-    const { content } = req.body
-    const comments = commentsByPostId[req.params.id] || []
-    comments.push({ id: commentId, content,status:"pending" })
-    commentsByPostId[req.params.id] = comments
-    await axios.post("http://event-bus-srv:4005/events", {
-        type: "CommentCreated",
-        data: {
-            id: commentId,
-            content,
-            postId: req.params.id,
-            status:"pending"
-        }
-    })
-    res.status(201).send(comments)
-})
-
-app.post("/events", async(req, res) => {
-    const { type, data } = req.body
-    if (type == "CommentModarated") {
-        const { id, postId, status,content } = data
-        const comments = commentsByPostId[postId]
-        const comment = comments.find((comment) => comment.id == id)
-        comment.status = status 
-        console.log(comment);
-        try {
-             await axios.post("http://event-bus-srv:4005/events", {
-            type: "CommentUpdated",
-            data: {
-                id,
-                postId,
-                status,
-                content
-            }
-        })
-        } catch (error) {
-            console.log(error.message);
-        }
-       
+app.post("/posts/:id/comments", async (req, res) => {
+  try {
+    if (!channel) {
+      await connect();
     }
-    res.send({})
-})
+
+    const commentId = randomBytes(4).toString("hex");
+    const { content } = req.body;
+    const postId = req.params.id;
+
+    const comments = commentsByPostId[postId] || [];
+    comments.push({ id: commentId, content, status: "pending" });
+    commentsByPostId[postId] = comments;
+
+    await channel.publish(
+      "posts_exchange", 
+      "comment_created", 
+      Buffer.from(
+        JSON.stringify({
+          type: "CommentCreated",
+          data: { id: commentId, content, postId, status: "pending" },
+        })
+      ),
+      { contentType: "application/json" }
+    );
+
+    res.status(201).send(comments);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error creating comment");
+  }
+});
 
 app.listen(4001, () => {
     console.log("server running on port 4001")
