@@ -8,7 +8,13 @@ The project structure is organized as follows:
 
 - **client:** Frontend client application.
 - **comments:** Microservice for handling comments functionality.
-- **event-bus:** Event bus microservice for managing communication between services.
 - **moderation:** Microservice responsible for moderating content.
 - **posts:** Microservice handling posts-related functionality.
 - **query:** Microservice for querying and fetching data.
+
+## Messaging System with RabbitMQ
+
+The project utilize RabbitMQ as the messaging system,it facilitates communication between microservices by enabling message queues and exchanges.
+
+rabbitmq-service: Provides the messaging backbone for inter-service communication.
+comments, moderation, posts, query: These microservices utilize RabbitMQ for sending and receiving messages to coordinate their actions and maintain data consistency
